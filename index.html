@@ -133,25 +133,27 @@
     })();
 
     // Formular an eigene API senden
-    document.getElementById('vollmachtForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const submitBtn = document.getElementById('submitBtn');
-      const success = document.getElementById('formSuccess');
-      const error = document.getElementById('formError');
+document.getElementById('vollmachtForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const submitBtn = document.getElementById('submitBtn');
+  const success = document.getElementById('formSuccess');
+  const error = document.getElementById('formError');
 
-      if (!form.reportValidity()) return;
-      if (document.getElementById('company').value.trim() !== '') return;
+  if (!form.reportValidity()) return;
 
-      submitBtn.disabled = true;
-      success.style.display = 'none';
-      error.style.display = 'none';
+  const companyField = document.getElementById('company');
+  if (companyField && companyField.value.trim() !== '') return;
 
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
+  submitBtn.disabled = true;
+  success.style.display = 'none';
+  error.style.display = 'none';
 
-      // Vollständige Vollmacht für E-Mail
-      data.vollmachtText = `
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
+
+  // Vollständige Vollmacht für E-Mail
+  data.vollmachtText = `
 DIGITALE VOLLMACHT ZUR WEITERGABE MEDIZINISCHER DATEN
 
 Ich, ${data.name}, geboren am ${data.dob}, wohnhaft in ${data.address}, 
@@ -164,30 +166,31 @@ der Wahrheit entsprechend sind.
 
 Ort, Datum: ${data.place}, ${data.dateSigned}
 Unterschrift: Digitale Bestätigung durch Absenden des Formulars
-      `.trim();
+  `.trim();
 
-      try {
-        const response = await fetch('/api/vollmacht', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-          success.style.display = 'block';
-          form.reset();
-          document.getElementById('dateSigned').value = new Date().toISOString().slice(0,10);
-          document.getElementById('place').value = 'Basel';
-        } else {
-          throw new Error('Fehler beim Senden');
-        }
-      } catch (err) {
-        error.style.display = 'block';
-        console.error(err);
-      } finally {
-        submitBtn.disabled = false;
-      }
+  try {
+    const response = await fetch('/api/vollmacht', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
+
+    if (response.ok) {
+      success.style.display = 'block';
+      form.reset();
+      document.getElementById('dateSigned').value = new Date().toISOString().slice(0,10);
+      document.getElementById('place').value = 'Basel';
+    } else {
+      throw new Error('HTTP ' + response.status);
+    }
+  } catch (err) {
+    console.error(err);
+    error.style.display = 'block';
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
   </script>
 </body>
 </html>
+
