@@ -43,7 +43,7 @@
     <h1>Digitale Vollmacht zur Weitergabe medizinischer Daten</h1>
     <p class="lead">Bitte füllen Sie das folgende Formular aus, um NovaSwissMed die Vollmacht zur Weitergabe Ihrer medizinischen Daten an die Hirslanden Klinik sowie an andere zur Behandlung notwendige medizinische Institutionen zu erteilen.</p>
 
-    <form id="vollmachtForm" method="POST" action="https://formspree.io/f/manbkjep">
+    <form id="vollmachtForm" method="POST" action="/api/vollmacht">
       <!-- SPAM-HONEYPOT -->
       <label class="sr-only" for="company">Firma</label>
       <input type="text" name="company" id="company" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" />
@@ -202,4 +202,5 @@
     })();
   </script>
 </body>
+
 </html>
