@@ -41,8 +41,9 @@
 <body>
   <main class="wrap">
     <h1>Digitale Vollmacht zur Weitergabe medizinischer Daten</h1>
-    <p class="lead">Bitte füllen Sie das folgende Formular aus, um NovaSwissMed die Vollmacht zur Weitergabe Ihrer medizinischen Daten an die Hirslanden Klinik sowie an andere zur Behandlung notwendige medizinische Institutionen zu erteilen.</p>
+    <p class="lead">Bitte füllen Sie das folgende Formular aus, um NovaSwissMed die Vollmacht zur Weitergabe Ihrer medizinischen Daten an zur Behandlung erforderliche medizinische Institutionen zu erteilen.</p>
 
+    <!-- 🔹 Sendet an deine eigene API auf Vercel -->
     <form id="vollmachtForm" method="POST" action="/api/vollmacht">
       <!-- SPAM-HONEYPOT -->
       <label class="sr-only" for="company">Firma</label>
@@ -57,7 +58,7 @@
           </div>
           <div>
             <label for="dob">Geburtsdatum <span class="req">*</span></label>
-            <input id="dob" name="dob" type="date" placeholder="TT.MM.JJJJ" required />
+            <input id="dob" name="dob" type="date" required />
           </div>
         </div>
         <div>
@@ -79,7 +80,7 @@
       <fieldset>
         <legend>Erklärung zur Vollmacht</legend>
         <div class="note small" aria-live="polite">
-          Ich, <em>[Vor- und Nachname]</em>, geboren am <em>[Geburtsdatum]</em>, wohnhaft in <em>[Adresse]</em>, bevollmächtige hiermit NovaSwissMed, vertreten durch Herrn Mohammad Kheir Naji, meine medizinischen Daten an die Hirslanden Klinik sowie an andere zur Behandlung notwendige medizinische Institutionen weiterzugeben. Ich bestätige, dass alle von mir gemachten Angaben vollständig, richtig und der Wahrheit entsprechend sind. Mit dem Absenden erkenne ich diese Vollmacht als rechtsverbindlich an.
+          Ich, <em>[Vor- und Nachname]</em>, geboren am <em>[Geburtsdatum]</em>, wohnhaft in <em>[Adresse]</em>, bevollmächtige hiermit NovaSwissMed, vertreten durch Herrn Mohammad Kheir Naji, meine medizinischen Daten an zur Behandlung erforderliche medizinische Institutionen weiterzugeben. Ich bestätige, dass alle von mir gemachten Angaben vollständig, richtig und der Wahrheit entsprechend sind. Mit dem Absenden erkenne ich diese Vollmacht als rechtsverbindlich an.
         </div>
         <div class="check">
           <input id="confirm" name="confirm" type="checkbox" required />
@@ -109,12 +110,6 @@
         </div>
       </fieldset>
 
-      <!-- Formspree: Empfänger via Dashboard konfigurieren (info@novaswissmed.com) -->
-      <input type="hidden" name="_subject" value="Vollmacht – Neue Einsendung" />
-      <input type="hidden" name="_format" value="plain" />
-      <!-- optional: eigene Bestätigungsseite -->
-      <!-- <input type="hidden" name="_redirect" value="https://deine-domain.tld/danke.html" /> -->
-
       <div class="actions">
         <button id="submitBtn" type="submit">Vollmacht digital erteilen</button>
         <span class="muted small">Mit Klick auf „Vollmacht digital erteilen“ übermitteln Sie die oben genannten Daten an NovaSwissMed.</span>
@@ -124,83 +119,75 @@
       <div id="formError" class="error" role="alert">Leider ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.</div>
     </form>
 
-    <p class="muted small" style="margin-top:14px;">Hinweis: Dieses Formular ist nur über eine HTTPS-Verbindung bereitzustellen. Bitte leiten Sie die erhaltene E-Mail anschließend an die behandelnde Einrichtung weiter.</p>
+    <p class="muted small" style="margin-top:14px;">Hinweis: Dieses Formular ist nur über eine HTTPS-Verbindung bereitzustellen.</p>
   </main>
 
   <script>
-    // Datum automatisch befüllen (CH / EU-Format yyyy-mm-dd für <input type="date">)
+    // Automatisches Datum und Ort
     (function initDefaults() {
-      var today = new Date();
-      var iso = today.toISOString().slice(0,10);
-      var dateField = document.getElementById('dateSigned');
-      if (dateField && !dateField.value) dateField.value = iso;
-      var place = document.getElementById('place');
+      const today = new Date().toISOString().slice(0,10);
+      const dateField = document.getElementById('dateSigned');
+      if (dateField && !dateField.value) dateField.value = today;
+      const place = document.getElementById('place');
       if (place && !place.value) place.value = 'Basel';
     })();
 
-    // Clientseitige Validierung + schönes Feedback
-    (function attachHandler() {
-      var form = document.getElementById('vollmachtForm');
-      var submitBtn = document.getElementById('submitBtn');
-      var ok = document.getElementById('formSuccess');
-      var err = document.getElementById('formError');
+    // Formular an eigene API senden
+    document.getElementById('vollmachtForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const submitBtn = document.getElementById('submitBtn');
+      const success = document.getElementById('formSuccess');
+      const error = document.getElementById('formError');
 
-      form.addEventListener('submit', async function(e) {
-        // Honeypot: falls Bot-Feld gefüllt ist -> nicht senden
-        if (document.getElementById('company').value.trim() !== '') {
-          e.preventDefault();
-          return;
+      if (!form.reportValidity()) return;
+      if (document.getElementById('company').value.trim() !== '') return;
+
+      submitBtn.disabled = true;
+      success.style.display = 'none';
+      error.style.display = 'none';
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      // Vollständige Vollmacht für E-Mail
+      data.vollmachtText = `
+DIGITALE VOLLMACHT ZUR WEITERGABE MEDIZINISCHER DATEN
+
+Ich, ${data.name}, geboren am ${data.dob}, wohnhaft in ${data.address}, 
+erteile hiermit NovaSwissMed, vertreten durch Herrn Mohammad Kheir Naji, 
+die Vollmacht, meine medizinischen Daten an zur Behandlung erforderliche 
+medizinische Institutionen weiterzugeben.
+
+Ich bestätige, dass alle von mir gemachten Angaben vollständig, richtig und 
+der Wahrheit entsprechend sind.
+
+Ort, Datum: ${data.place}, ${data.dateSigned}
+Unterschrift: Digitale Bestätigung durch Absenden des Formulars
+      `.trim();
+
+      try {
+        const response = await fetch('/api/vollmacht', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          success.style.display = 'block';
+          form.reset();
+          document.getElementById('dateSigned').value = new Date().toISOString().slice(0,10);
+          document.getElementById('place').value = 'Basel';
+        } else {
+          throw new Error('Fehler beim Senden');
         }
-        if (!form.reportValidity()) { e.preventDefault(); return; }
-
-        // Fetch nur nutzen, wenn Action-URL eine absolute Formspree-URL ist
-        var action = form.getAttribute('action');
-        if (!/^https?:\/\/formspree\.io\/f\//i.test(action)) return; // Browser-Submit (falls von dir gewünscht)
-
-        e.preventDefault();
-        submitBtn.disabled = true; ok.style.display = 'none'; err.style.display = 'none';
-
-        try {
-          var fd = new FormData(form);
-
-          // Für klare Betreffzeile inkl. Name/Geburtsdatum
-          var subject = 'Vollmacht – ' + (fd.get('name') || 'Unbekannt') + ' – ' + (fd.get('dob') || '');
-          fd.set('_subject', subject);
-
-          // Optional: formatiere eine menschenlesbare Zusammenfassung
-          var summary =
-            'Digitale Vollmacht – NovaSwissMed\n\n' +
-            'Name: ' + (fd.get('name')||'') + '\n' +
-            'Geburtsdatum: ' + (fd.get('dob')||'') + '\n' +
-            'Adresse: ' + (fd.get('address')||'') + '\n' +
-            'E-Mail: ' + (fd.get('email')||'') + '\n' +
-            'Telefon: ' + (fd.get('phone')||'') + '\n' +
-            'Ort/Datum: ' + (fd.get('place')||'') + ', ' + (fd.get('dateSigned')||'') + '\n' +
-            'Einverständnis: ' + (form.confirm.checked ? 'ja' : 'nein') + '\n' +
-            'Datenschutz akzeptiert: ' + (form.privacy.checked ? 'ja' : 'nein') + '\n\n' +
-            'Erklärung:\n' +
-            'Ich, [Name], geboren am [Geburtsdatum], wohnhaft in [Adresse], bevollmächtige hiermit NovaSwissMed, vertreten durch Herrn Mohammad Kheir Naji, meine medizinischen Daten an die Hirslanden Klinik sowie an andere zur Behandlung notwendige medizinische Institutionen weiterzugeben. Ich bestätige, dass alle von mir gemachten Angaben vollständig, richtig und der Wahrheit entsprechend sind. Mit dem Absenden erkenne ich diese Vollmacht als rechtsverbindlich an.';
-          fd.append('Zusammenfassung', summary);
-
-          var resp = await fetch(action, { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } });
-          if (resp.ok) {
-            ok.style.display = 'block';
-            form.reset();
-            // Datum/Ort wieder vorbelegen
-            document.getElementById('dateSigned').value = new Date().toISOString().slice(0,10);
-            document.getElementById('place').value = 'Basel';
-          } else {
-            throw new Error('HTTP ' + resp.status);
-          }
-        } catch (ex) {
-          err.style.display = 'block';
-          console.error(ex);
-        } finally {
-          submitBtn.disabled = false;
-        }
-      });
-    })();
+      } catch (err) {
+        error.style.display = 'block';
+        console.error(err);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
   </script>
 </body>
-
 </html>
