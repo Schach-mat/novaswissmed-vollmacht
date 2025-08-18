@@ -122,40 +122,37 @@
     <p class="muted small" style="margin-top:14px;">Hinweis: Dieses Formular ist nur über eine HTTPS-Verbindung bereitzustellen.</p>
   </main>
 
-  <script>
-    // Automatisches Datum und Ort
-    (function initDefaults() {
-      const today = new Date().toISOString().slice(0,10);
-      const dateField = document.getElementById('dateSigned');
-      if (dateField && !dateField.value) dateField.value = today;
-      const place = document.getElementById('place');
-      if (place && !place.value) place.value = 'Basel';
-    })();
+<script>
+  // Automatisches Datum und Ort
+  (function initDefaults() {
+    const today = new Date().toISOString().slice(0,10);
+    const dateField = document.getElementById('dateSigned');
+    if (dateField && !dateField.value) dateField.value = today;
+    const place = document.getElementById('place');
+    if (place && !place.value) place.value = 'Basel';
+  })();
 
-    // Formular an eigene API senden
-    document.getElementById('vollmachtForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const submitBtn = document.getElementById('submitBtn');
-      const success = document.getElementById('formSuccess');
-      const error = document.getElementById('formError');
+  // Formular an Vercel-API senden
+  document.getElementById('vollmachtForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = document.getElementById('submitBtn');
+    const success = document.getElementById('formSuccess');
+    const error = document.getElementById('formError');
 
-      // Prüfe, ob Formular gültig ist
-      if (!form.reportValidity()) return;
+    if (!form.reportValidity()) return;
 
-      // Honeypot: Falls Bot-Feld gefüllt ist → abbrechen
-      const companyField = document.getElementById('company');
-      if (companyField && companyField.value.trim() !== '') return;
+    const companyField = document.getElementById('company');
+    if (companyField && companyField.value.trim() !== '') return;
 
-      submitBtn.disabled = true;
-      success.style.display = 'none';
-      error.style.display = 'none';
+    submitBtn.disabled = true;
+    success.style.display = 'none';
+    error.style.display = 'none';
 
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-      // Vollständige Vollmacht für E-Mail
-      data.vollmachtText = `
+    data.vollmachtText = `
 DIGITALE VOLLMACHT ZUR WEITERGABE MEDIZINISCHER DATEN
 
 Ich, ${data.name}, geboren am ${data.dob}, wohnhaft in ${data.address}, 
@@ -168,31 +165,32 @@ der Wahrheit entsprechend sind.
 
 Ort, Datum: ${data.place}, ${data.dateSigned}
 Unterschrift: Digitale Bestätigung durch Absenden des Formulars
-      `.trim();
+    `.trim();
 
-      try {
-        const response = await fetch('https://novaswissmed-vollmacht.vercel.app/api/vollmacht', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+    try {
+      const response = await fetch('https://novaswissmed-vollmacht.vercel.app/api/vollmacht', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
 
-        if (response.ok) {
-          success.style.display = 'block';
-          form.reset();
-          document.getElementById('dateSigned').value = new Date().toISOString().slice(0,10);
-          document.getElementById('place').value = 'Basel';
-        } else {
-          throw new Error('HTTP ' + response.status);
-        }
-      } catch (err) {
-        console.error('Netzwerkfehler:', err);
-        error.style.display = 'block';
-      } finally {
-        submitBtn.disabled = false;
+      if (response.ok) {
+        success.style.display = 'block';
+        form.reset();
+        document.getElementById('dateSigned').value = new Date().toISOString().slice(0,10);
+        document.getElementById('place').value = 'Basel';
+      } else {
+        throw new Error('HTTP ' + response.status);
       }
-    });
-  </script>
+    } catch (err) {
+      console.error('Netzwerkfehler:', err);
+      error.style.display = 'block';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>
 </body>
 </html>
+
 
