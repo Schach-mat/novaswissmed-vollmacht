@@ -21,7 +21,7 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false, // true nur für Port 465
   auth: {
-    user: "apikey", // Fester Wert bei Brevo, nicht deine E-Mail
+    user: '94edae001@smtp-brevo.com', // Fester Wert bei Brevo, nicht deine E-Mail
     pass: process.env.SMTP_PASSWORD, // Dein Brevo API-Key
   },
 });
