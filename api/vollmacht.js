@@ -16,20 +16,21 @@ export default async function handler(req, res) {
   }
 
   // 4. E-Mail-Konfiguration mit Brevo (früher Sendinblue)
-  const transporter = nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com', // Brevo SMTP-Server
-    port: 587,
-    secure: false, // true für 465, false für 587
-    auth: {
-      user: 'info@novaswissmed.com', // Deine E-Mail
-      pass: process.env.SMTP_PASSWORD, // Dein Brevo API-Key (in Vercel gesetzt)
-    },
-  });
+const transporter = nodemailer.createTransport({
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false, // true nur für Port 465
+  auth: {
+    user: "apikey", // Fester Wert bei Brevo, nicht deine E-Mail
+    pass: process.env.SMTP_PASSWORD, // Dein Brevo API-Key
+  },
+});
+
 
   try {
     // 5. E-Mail senden
     await transporter.sendMail({
-      from: 'info@novaswissmed.com',
+      from: '"NovaSwissMed" <info@novaswissmed.com>', // schöner & sicherer
       to: 'info@novaswissmed.com', // Du als Empfänger
       replyTo: email, // Damit du direkt auf den Patienten antworten kannst
       subject: `Vollmacht – ${name} – ${dateSigned}`,
