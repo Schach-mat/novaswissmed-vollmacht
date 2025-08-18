@@ -2,25 +2,33 @@
 const nodemailer = require('nodemailer');
 
 export default async function handler(req, res) {
+  // CORS-Header hinzufügen
+  res.setHeader('Access-Control-Allow-Origin', 'https://novaswissmed.com');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight request (OPTIONS)
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Nur POST-Anfragen erlaubt' });
   }
 
   const { name, dob, address, email, phone, place, dateSigned, vollmachtText } = req.body;
 
-  // Prüfe, ob alle Pflichtfelder vorhanden sind
   if (!name || !dob || !address || !email || !place || !dateSigned) {
     return res.status(400).json({ message: 'Fehlende erforderliche Felder' });
   }
 
-  // SMTP-Transport mit Brevo
   const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
     port: 587,
     secure: false,
     auth: {
-      user: '94edae001@smtp-brevo.com', // Dein SMTP-Login aus Brevo
-      pass: process.env.SMTP_PASSWORD,  // Dein API-Key (in Vercel gesetzt)
+      user: '94edae001@smtp-brevo.com',
+      pass: process.env.SMTP_PASSWORD,
     },
   });
 
