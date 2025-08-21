@@ -37,7 +37,6 @@
       margin: 0 0 24px;
     }
 
-    /* Label und Input: 6px Abstand */
     .form-row {
       margin-bottom: 6px;
     }
@@ -48,7 +47,6 @@
       margin: 0 0 6px;
     }
 
-    /* Abstand nach einem Eingabefeld, bevor nächstes Label kommt: 10px */
     .field-gap {
       margin-bottom: 10px;
     }
@@ -641,7 +639,6 @@
     const phonePrefix = document.getElementById('phonePrefix');
     const phoneInput = document.getElementById('phone');
 
-    // Vorwahl setzen
     function updatePhonePrefix() {
       const selectedCountry = countrySelect.value;
       const prefix = countryCodes[selectedCountry] || '+41';
@@ -650,14 +647,13 @@
 
     countrySelect.addEventListener('change', updatePhonePrefix);
 
-    // Automatisches Datum
     document.addEventListener('DOMContentLoaded', () => {
       const today = new Date().toISOString().slice(0,10);
       document.getElementById('dateSigned').value = today;
-      updatePhonePrefix(); // Setze Vorwahl bei Laden
+      document.getElementById('place').value = 'Basel';
+      updatePhonePrefix();
     });
 
-    // Formular senden
     document.addEventListener('DOMContentLoaded', () => {
       const container = document.querySelector('.container');
       const success = document.getElementById('success-message');
@@ -735,7 +731,9 @@ Datum des Eingangs: ${data.dateSigned.split('-').reverse().join('.')}
           if (response.ok) {
             success.style.display = 'block';
             container.reset();
-            updatePhonePrefix(); // Vorwahl nach Reset wiederherstellen
+            document.getElementById('dateSigned').value = new Date().toISOString().slice(0,10);
+            document.getElementById('place').value = 'Basel';
+            updatePhonePrefix();
           } else {
             throw new Error('HTTP ' + response.status);
           }
