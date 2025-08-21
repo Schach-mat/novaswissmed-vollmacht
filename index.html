@@ -648,9 +648,8 @@
     countrySelect.addEventListener('change', updatePhonePrefix);
 
     document.addEventListener('DOMContentLoaded', () => {
-      const today = new Date().toISOString().slice(0,10);
+      const today = new Date().toISOString().slice(0, 10);
       document.getElementById('dateSigned').value = today;
-      document.getElementById('place').value = 'Basel';
       updatePhonePrefix();
     });
 
@@ -731,8 +730,8 @@ Datum des Eingangs: ${data.dateSigned.split('-').reverse().join('.')}
           if (response.ok) {
             success.style.display = 'block';
             container.reset();
-            document.getElementById('dateSigned').value = new Date().toISOString().slice(0,10);
-            document.getElementById('place').value = 'Basel';
+            document.getElementById('dateSigned').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('place').value = '';
             updatePhonePrefix();
           } else {
             throw new Error('HTTP ' + response.status);
