@@ -1,746 +1,192 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Digitale Vollmacht – NovaSwissMed</title>
   <style>
-    body {
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      color: #111;
-      background-color: #fff;
-      margin: 0;
-      padding: 20px;
-      line-height: 1.6;
-      max-width: 860px;
-      margin: 32px auto;
+    :root { --bg:#fff; --fg:#111; --muted:#666; --brand:#0a6cf1; --line:#e6e6e6; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--fg); background: var(--bg); }
+    .wrap { max-width: 860px; margin: 32px auto; padding: 0 16px; }
+    h1 { font-size: 1.6rem; margin: 0 0 4px; }
+    p.lead { color: var(--muted); margin: 0 0 24px; }
+    form { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+    fieldset { border: 0; padding: 0; margin: 0 0 18px; }
+    legend { font-weight: 600; margin: 0 0 10px; }
+    .grid { display: grid; gap: 14px; }
+    @media (min-width: 720px) { .grid.cols-2 { grid-template-columns: 1fr 1fr; } }
+    label { display: block; font-weight: 600; margin: 0 0 6px; }
+    .req { color: #c81414; }
+    input, textarea, select {
+      width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit;
     }
-    .container {
-      padding: 24px;
-      background: #fff;
-      border: 1px solid #e6e6e6;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(63,69,81,0.16);
-    }
-    .logo {
-      height: 48px;
-      margin-bottom: 20px;
-    }
-    h1 {
-      font-size: 1.8rem;
-      color: #0a6cf1;
-      margin: 0 0 16px;
-    }
-    .intro-text {
-      font-size: 15px;
-      color: #666;
-      margin: 0 0 24px;
-    }
-
-    .form-row {
-      margin-bottom: 6px;
-    }
-    .form-row label {
-      display: block;
-      font-weight: 600;
-      font-size: 0.95rem;
-      margin: 0 0 6px;
-    }
-
-    .field-gap {
-      margin-bottom: 10px;
-    }
-
-    input[type="text"],
-    input[type="date"],
-    input[type="tel"],
-    input[type="email"],
-    select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #e6e6e6;
-      border-radius: 8px;
-      font: inherit;
-      font-size: 1rem;
-    }
-
-    .grid {
-      display: grid;
-      gap: 16px;
-    }
-    @media (min-width: 720px) {
-      .grid.cols-2 { grid-template-columns: 1fr 1fr; }
-      .grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-    }
-
-    .declaration {
-      background: #f7f9fc;
-      border: 1px solid #e6e6e6;
-      border-radius: 8px;
-      padding: 16px;
-      font-size: 0.92rem;
-      color: #666;
-      margin: 20px 0;
-    }
-
-    .signature {
-      margin: 20px 0;
-      font-style: italic;
-      font-size: 0.95rem;
-    }
-
+    textarea { min-height: 120px; resize: vertical; }
+    .check { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
+    .muted { color: var(--muted); }
+    .note { background: #f7f9fc; border: 1px solid var(--line); padding: 14px; border-radius: 10px; }
+    .actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
     button {
-      background: #0a6cf1;
-      color: #fff;
-      border: 0;
-      padding: 14px 20px;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 1.05rem;
-      display: block;
-      margin: 24px 0;
+      appearance: none; border: 0; background: var(--brand); color: #fff; padding: 12px 18px;
+      border-radius: 12px; font-weight: 700; cursor: pointer;
     }
-    button:hover {
-      background: #0858c1;
-    }
-
-    #success-message {
-      display: none;
-      background: #e8f7ed;
-      border: 1px solid #bfe6cb;
-      color: #155724;
-      padding: 14px;
-      border-radius: 8px;
-      text-align: center;
-      margin-top: 14px;
-    }
+    button[disabled] { opacity: .7; cursor: not-allowed; }
+    .small { font-size: .92rem; }
+    .success, .error { margin-top: 14px; padding: 12px 14px; border-radius: 10px; display: none; }
+    .success { background: #e8f7ed; border: 1px solid #bfe6cb; }
+    .error { background: #fde8ea; border: 1px solid #f5bcc2; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <img src="https://novaswissmed.com/images/logo.png" alt="NovaSwissMed Logo" class="logo">
+  <main class="wrap">
     <h1>Digitale Vollmacht zur Weitergabe medizinischer Daten</h1>
-    <p class="intro-text">Bitte füllen Sie das folgende Formular aus, um NovaSwissMed die Vollmacht zur Weitergabe Ihrer medizinischen Daten zu erteilen.<br>Die Daten werden ausschließlich im Rahmen Ihrer medizinischen Versorgung an zur Behandlung erforderliche medizinische Institutionen weitergeleitet.</p>
+    <p class="lead">Bitte füllen Sie das folgende Formular aus, um NovaSwissMed die Vollmacht zur Weitergabe Ihrer medizinischen Daten an zur Behandlung erforderliche medizinische Institutionen zu erteilen.</p>
 
-    <div class="form-section">
-      <!-- Vorname -->
-      <div class="form-row">
-        <label for="firstname">Vorname <span style="color: #c81414;">*</span></label>
-        <input type="text" id="firstname" required>
-      </div>
-      <div class="field-gap"></div>
+    <form id="vollmachtForm">
+      <!-- SPAM-HONEYPOT -->
+      <label class="sr-only" for="company">Firma</label>
+      <input type="text" name="company" id="company" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" />
 
-      <!-- Nachname -->
-      <div class="form-row">
-        <label for="lastname">Nachname <span style="color: #c81414;">*</span></label>
-        <input type="text" id="lastname" required>
-      </div>
-      <div class="field-gap"></div>
-
-      <!-- Geburtsdatum + Geschlecht -->
-      <div class="grid cols-2">
-        <div>
-          <div class="form-row">
-            <label for="dob">Geburtsdatum <span style="color: #c81414;">*</span></label>
-            <input type="date" id="dob" required>
+      <fieldset>
+        <legend>Ihre Angaben</legend>
+        <div class="grid cols-2">
+          <div>
+            <label for="name">Vor- und Nachname <span class="req">*</span></label>
+            <input id="name" name="name" type="text" autocomplete="name" required />
+          </div>
+          <div>
+            <label for="dob">Geburtsdatum <span class="req">*</span></label>
+            <input id="dob" name="dob" type="date" required />
           </div>
         </div>
         <div>
-          <div class="form-row">
-            <label for="gender">Geschlecht <span style="color: #c81414;">*</span></label>
-            <select id="gender" required>
-              <option value="">-- Bitte wählen --</option>
-              <option value="männlich">männlich</option>
-              <option value="weiblich">weiblich</option>
-              <option value="divers">divers</option>
-            </select>
+          <label for="address">Adresse (Strasse, PLZ, Ort) <span class="req">*</span></label>
+          <input id="address" name="address" type="text" placeholder="Musterstrasse 1, 4051 Basel" required />
+        </div>
+        <div class="grid cols-2">
+          <div>
+            <label for="email">E-Mail-Adresse <span class="req">*</span></label>
+            <input id="email" name="email" type="email" autocomplete="email" required />
+          </div>
+          <div>
+            <label for="phone">Telefonnummer (optional)</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" />
           </div>
         </div>
-      </div>
-      <div class="field-gap"></div>
+      </fieldset>
 
-      <!-- Adresse -->
-      <div class="form-row">
-        <label for="address">Adresse (Strasse und Hausnummer) <span style="color: #c81414;">*</span></label>
-        <input type="text" id="address" required>
-      </div>
-      <div class="field-gap"></div>
+      <fieldset>
+        <legend>Erklärung zur Vollmacht</legend>
+        <div class="note small" aria-live="polite">
+          Ich, <em>[Vor- und Nachname]</em>, geboren am <em>[Geburtsdatum]</em>, wohnhaft in <em>[Adresse]</em>, bevollmächtige hiermit NovaSwissMed, vertreten durch Herrn Mohammad Kheir Naji, meine medizinischen Daten an zur Behandlung erforderliche medizinische Institutionen weiterzugeben. Ich bestätige, dass alle von mir gemachten Angaben vollständig, richtig und der Wahrheit entsprechend sind. Mit dem Absenden erkenne ich diese Vollmacht als rechtsverbindlich an.
+        </div>
+        <div class="check">
+          <input id="confirm" name="confirm" type="checkbox" required />
+          <label for="confirm">Ich bestätige die oben stehende Erklärung und erkläre mich mit der elektronischen Weitergabe meiner medizinischen Daten einverstanden. <span class="req">*</span></label>
+        </div>
+      </fieldset>
 
-      <!-- PLZ, Stadt, Land -->
-      <div class="grid cols-3">
-        <div class="form-row">
-          <label for="plz">PLZ <span style="color: #c81414;">*</span></label>
-          <input type="text" id="plz" required>
-        </div>
-        <div class="form-row">
-          <label for="city">Stadt <span style="color: #c81414;">*</span></label>
-          <input type="text" id="city" required>
-        </div>
-        <div class="form-row">
-          <label for="country">Land <span style="color: #c81414;">*</span></label>
-          <select id="country" required>
-            <option value="">-- Bitte wählen --</option>
-            <option value="Afghanistan">Afghanistan</option>
-            <option value="Ägypten">Ägypten</option>
-            <option value="Albanien">Albanien</option>
-            <option value="Algerien">Algerien</option>
-            <option value="Andorra">Andorra</option>
-            <option value="Angola">Angola</option>
-            <option value="Antigua und Barbuda">Antigua und Barbuda</option>
-            <option value="Äquatorialguinee">Äquatorialguinee</option>
-            <option value="Argentinien">Argentinien</option>
-            <option value="Armenien">Armenien</option>
-            <option value="Aserbaidschan">Aserbaidschan</option>
-            <option value="Äthiopien">Äthiopien</option>
-            <option value="Australien">Australien</option>
-            <option value="Bahamas">Bahamas</option>
-            <option value="Bahrain">Bahrain</option>
-            <option value="Bangladesch">Bangladesch</option>
-            <option value="Barbados">Barbados</option>
-            <option value="Belgien">Belgien</option>
-            <option value="Belize">Belize</option>
-            <option value="Benin">Benin</option>
-            <option value="Bhutan">Bhutan</option>
-            <option value="Bolivien">Bolivien</option>
-            <option value="Bosnien und Herzegowina">Bosnien und Herzegowina</option>
-            <option value="Botswana">Botswana</option>
-            <option value="Brasilien">Brasilien</option>
-            <option value="Brunei">Brunei</option>
-            <option value="Bulgarien">Bulgarien</option>
-            <option value="Burkina Faso">Burkina Faso</option>
-            <option value="Burundi">Burundi</option>
-            <option value="Chile">Chile</option>
-            <option value="China">China</option>
-            <option value="Costa Rica">Costa Rica</option>
-            <option value="Dänemark">Dänemark</option>
-            <option value="Deutschland">Deutschland</option>
-            <option value="Dominica">Dominica</option>
-            <option value="Dominikanische Republik">Dominikanische Republik</option>
-            <option value="Dschibuti">Dschibuti</option>
-            <option value="Ecuador">Ecuador</option>
-            <option value="El Salvador">El Salvador</option>
-            <option value="Elfenbeinküste">Elfenbeinküste</option>
-            <option value="Eritrea">Eritrea</option>
-            <option value="Estland">Estland</option>
-            <option value="Eswatini">Eswatini</option>
-            <option value="Fidschi">Fidschi</option>
-            <option value="Finnland">Finnland</option>
-            <option value="Frankreich">Frankreich</option>
-            <option value="Gabun">Gabun</option>
-            <option value="Gambia">Gambia</option>
-            <option value="Georgien">Georgien</option>
-            <option value="Ghana">Ghana</option>
-            <option value="Grenada">Grenada</option>
-            <option value="Griechenland">Griechenland</option>
-            <option value="Guatemala">Guatemala</option>
-            <option value="Guinea">Guinea</option>
-            <option value="Guinea-Bissau">Guinea-Bissau</option>
-            <option value="Guyana">Guyana</option>
-            <option value="Haiti">Haiti</option>
-            <option value="Honduras">Honduras</option>
-            <option value="Indien">Indien</option>
-            <option value="Indonesien">Indonesien</option>
-            <option value="Irak">Irak</option>
-            <option value="Iran">Iran</option>
-            <option value="Irland">Irland</option>
-            <option value="Island">Island</option>
-            <option value="Israel">Israel</option>
-            <option value="Italien">Italien</option>
-            <option value="Jamaika">Jamaika</option>
-            <option value="Japan">Japan</option>
-            <option value="Jemen">Jemen</option>
-            <option value="Jordanien">Jordanien</option>
-            <option value="Kambodscha">Kambodscha</option>
-            <option value="Kamerun">Kamerun</option>
-            <option value="Kanada">Kanada</option>
-            <option value="Kap Verde">Kap Verde</option>
-            <option value="Kasachstan">Kasachstan</option>
-            <option value="Katar">Katar</option>
-            <option value="Kenia">Kenia</option>
-            <option value="Kirgisistan">Kirgisistan</option>
-            <option value="Kiribati">Kiribati</option>
-            <option value="Kolumbien">Kolumbien</option>
-            <option value="Komoren">Komoren</option>
-            <option value="Kongo (Demokratische Republik)">Kongo (Demokratische Republik)</option>
-            <option value="Kongo (Republik)">Kongo (Republik)</option>
-            <option value="Kroatien">Kroatien</option>
-            <option value="Kuba">Kuba</option>
-            <option value="Kuwait">Kuwait</option>
-            <option value="Laos">Laos</option>
-            <option value="Lesotho">Lesotho</option>
-            <option value="Lettland">Lettland</option>
-            <option value="Libanon">Libanon</option>
-            <option value="Liberia">Liberia</option>
-            <option value="Libyen">Libyen</option>
-            <option value="Liechtenstein">Liechtenstein</option>
-            <option value="Litauen">Litauen</option>
-            <option value="Luxemburg">Luxemburg</option>
-            <option value="Madagaskar">Madagaskar</option>
-            <option value="Malawi">Malawi</option>
-            <option value="Malaysia">Malaysia</option>
-            <option value="Malediven">Malediven</option>
-            <option value="Mali">Mali</option>
-            <option value="Malta">Malta</option>
-            <option value="Marokko">Marokko</option>
-            <option value="Marshallinseln">Marshallinseln</option>
-            <option value="Mauretanien">Mauretanien</option>
-            <option value="Mauritius">Mauritius</option>
-            <option value="Mexiko">Mexiko</option>
-            <option value="Mikronesien">Mikronesien</option>
-            <option value="Moldawien">Moldawien</option>
-            <option value="Monaco">Monaco</option>
-            <option value="Mongolei">Mongolei</option>
-            <option value="Montenegro">Montenegro</option>
-            <option value="Mosambik">Mosambik</option>
-            <option value="Myanmar">Myanmar</option>
-            <option value="Namibia">Namibia</option>
-            <option value="Nauru">Nauru</option>
-            <option value="Nepal">Nepal</option>
-            <option value="Neuseeland">Neuseeland</option>
-            <option value="Nicaragua">Nicaragua</option>
-            <option value="Niederlande">Niederlande</option>
-            <option value="Niger">Niger</option>
-            <option value="Nigeria">Nigeria</option>
-            <option value="Nordkorea">Nordkorea</option>
-            <option value="Nordmazedonien">Nordmazedonien</option>
-            <option value="Norwegen">Norwegen</option>
-            <option value="Oman">Oman</option>
-            <option value="Österreich">Österreich</option>
-            <option value="Pakistan">Pakistan</option>
-            <option value="Palau">Palau</option>
-            <option value="Panama">Panama</option>
-            <option value="Papua-Neuguinea">Papua-Neuguinea</option>
-            <option value="Paraguay">Paraguay</option>
-            <option value="Peru">Peru</option>
-            <option value="Philippinen">Philippinen</option>
-            <option value="Polen">Polen</option>
-            <option value="Portugal">Portugal</option>
-            <option value="Ruanda">Ruanda</option>
-            <option value="Rumänien">Rumänien</option>
-            <option value="Russland">Russland</option>
-            <option value="Salomonen">Salomonen</option>
-            <option value="Sambia">Sambia</option>
-            <option value="Samoa">Samoa</option>
-            <option value="San Marino">San Marino</option>
-            <option value="São Tomé und Príncipe">São Tomé und Príncipe</option>
-            <option value="Saudi-Arabien">Saudi-Arabien</option>
-            <option value="Schweden">Schweden</option>
-            <option value="Schweiz">Schweiz</option>
-            <option value="Senegal">Senegal</option>
-            <option value="Serbien">Serbien</option>
-            <option value="Seychellen">Seychellen</option>
-            <option value="Sierra Leone">Sierra Leone</option>
-            <option value="Simbabwe">Simbabwe</option>
-            <option value="Singapur">Singapur</option>
-            <option value="Slowakei">Slowakei</option>
-            <option value="Slowenien">Slowenien</option>
-            <option value="Somalia">Somalia</option>
-            <option value="Spanien">Spanien</option>
-            <option value="Sri Lanka">Sri Lanka</option>
-            <option value="St. Kitts und Nevis">St. Kitts und Nevis</option>
-            <option value="St. Lucia">St. Lucia</option>
-            <option value="St. Vincent und die Grenadinen">St. Vincent und die Grenadinen</option>
-            <option value="Südafrika">Südafrika</option>
-            <option value="Sudan">Sudan</option>
-            <option value="Südsudan">Südsudan</option>
-            <option value="Suriname">Suriname</option>
-            <option value="Syrien">Syrien</option>
-            <option value="Tadschikistan">Tadschikistan</option>
-            <option value="Tansania">Tansania</option>
-            <option value="Thailand">Thailand</option>
-            <option value="Timor-Leste">Timor-Leste</option>
-            <option value="Togo">Togo</option>
-            <option value="Tonga">Tonga</option>
-            <option value="Trinidad und Tobago">Trinidad und Tobago</option>
-            <option value="Tschad">Tschad</option>
-            <option value="Tschechien">Tschechien</option>
-            <option value="Tunesien">Tunesien</option>
-            <option value="Türkei">Türkei</option>
-            <option value="Turkmenistan">Turkmenistan</option>
-            <option value="Tuvalu">Tuvalu</option>
-            <option value="Uganda">Uganda</option>
-            <option value="Ukraine">Ukraine</option>
-            <option value="Ungarn">Ungarn</option>
-            <option value="Uruguay">Uruguay</option>
-            <option value="Usbekistan">Usbekistan</option>
-            <option value="Vanuatu">Vanuatu</option>
-            <option value="Venezuela">Venezuela</option>
-            <option value="Vereinigte Arabische Emirate">Vereinigte Arabische Emirate</option>
-            <option value="Vereinigte Staaten">Vereinigte Staaten</option>
-            <option value="Vereinigtes Königreich">Vereinigtes Königreich</option>
-            <option value="Vietnam">Vietnam</option>
-            <option value="Zentralafrikanische Republik">Zentralafrikanische Republik</option>
-            <option value="Zypern">Zypern</option>
-          </select>
-        </div>
-      </div>
-      <div class="field-gap"></div>
-
-      <!-- Telefonnummer + Reisepassnummer -->
-      <div class="grid cols-2">
-        <div>
-          <label for="phonePrefix">Telefonnummer <span style="color: #c81414;">*</span></label>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <span id="phonePrefix" style="padding: 12px; border: 1px solid #e6e6e6; border-radius: 8px; min-width: 100px; background: #f7f9fc; font: inherit;">+41</span>
-            <input type="tel" id="phone" placeholder="79 123 45 67" style="flex: 1;" required>
+      <fieldset>
+        <legend>Ort & Datum</legend>
+        <div class="grid cols-2">
+          <div>
+            <label for="place">Ort <span class="req">*</span></label>
+            <input id="place" name="place" type="text" placeholder="Basel" required />
+          </div>
+          <div>
+            <label for="dateSigned">Datum <span class="req">*</span></label>
+            <input id="dateSigned" name="dateSigned" type="date" required />
           </div>
         </div>
-        <div>
-          <div class="form-row">
-            <label for="passport">Reisepassnummer</label>
-            <input type="text" id="passport">
-          </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Datenschutz</legend>
+        <div class="check">
+          <input id="privacy" name="privacy" type="checkbox" required />
+          <label for="privacy">Ich habe die <a href="/datenschutz" target="_blank" rel="noopener">Datenschutzerklärung</a> zur Kenntnis genommen. <span class="req">*</span></label>
         </div>
+      </fieldset>
+
+      <div class="actions">
+        <button id="submitBtn" type="submit">Vollmacht digital erteilen</button>
+        <span class="muted small">Mit Klick auf „Vollmacht digital erteilen“ übermitteln Sie die oben genannten Daten an NovaSwissMed.</span>
       </div>
-      <div class="field-gap"></div>
 
-      <!-- E-Mail-Adresse -->
-      <div class="form-row">
-        <label for="email">E-Mail-Adresse <span style="color: #c81414;">*</span></label>
-        <input type="email" id="email" required>
-      </div>
-      <div class="field-gap"></div>
+      <div id="formSuccess" class="success" role="status">Vielen Dank! Ihre Vollmacht wurde erfolgreich gesendet.</div>
+      <div id="formError" class="error" role="alert">Leider ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.</div>
+    </form>
 
-      <!-- Ort + Datum -->
-      <div class="grid cols-2">
-        <div class="form-row">
-          <label for="place">Ort <span style="color: #c81414;">*</span></label>
-          <input type="text" id="place" required>
-        </div>
-        <div class="form-row">
-          <label for="dateSigned">Datum <span style="color: #c81414;">*</span></label>
-          <input type="date" id="dateSigned" required>
-        </div>
-      </div>
-    </div>
-
-    <div class="declaration">
-      <p><strong>ERKLÄRUNG ZUR VOLLMACHT</strong></p>
-      <p>Ich erteile hiermit NovaSwissMed, vertreten durch Herrn Mohammad Kheir Naji, die Vollmacht, meine medizinischen Daten an andere beteiligte medizinische Stellen weiterzugeben. Die Weitergabe erfolgt ausschließlich zur Abklärung, Behandlung und Koordination meiner medizinischen Versorgung und ist auf die dafür erforderlichen Institutionen beschränkt.</p>
-      <p>Ich bestätige, dass alle von mir gemachten Angaben vollständig, richtig und der Wahrheit entsprechend sind.</p>
-      <p>Diese Vollmacht wird mit meiner Unterschrift – ob digital bestätigt oder handschriftlich unterschrieben – rechtsverbindlich.</p>
-      <p>Ich erkläre mich mit der elektronischen Weitergabe meiner medizinischen Daten einverstanden.</p>
-    </div>
-
-    <div class="form-section">
-      <label>
-        <input type="checkbox" id="confirm" required>
-        Ich bestätige die oben stehende Erklärung.
-      </label>
-    </div>
-
-    <div class="signature">
-      <p>Unterschrift (Patient): Digitale Bestätigung durch Absenden des Formulars</p>
-      <p>Unterschrift der bevollmächtigten Stelle NovaSwissMed: Digitale Bestätigung durch System</p>
-    </div>
-
-    <button type="submit">Vollmacht digital erteilen</button>
-    <div id="success-message">Vielen Dank! Ihre Vollmacht wurde erfolgreich gesendet.</div>
-  </div>
+    <p class="muted small" style="margin-top:14px;">Hinweis: Dieses Formular ist nur über eine HTTPS-Verbindung bereitzustellen.</p>
+  </main>
 
   <script>
-    // Länder-Vorwahlen
-    const countryCodes = {
-      'Afghanistan': '+93',
-      'Ägypten': '+20',
-      'Albanien': '+355',
-      'Algerien': '+213',
-      'Andorra': '+376',
-      'Angola': '+244',
-      'Antigua und Barbuda': '+1-268',
-      'Äquatorialguinee': '+240',
-      'Argentinien': '+54',
-      'Armenien': '+374',
-      'Aserbaidschan': '+994',
-      'Äthiopien': '+251',
-      'Australien': '+61',
-      'Bahamas': '+1-242',
-      'Bahrain': '+973',
-      'Bangladesch': '+880',
-      'Barbados': '+1-246',
-      'Belgien': '+32',
-      'Belize': '+501',
-      'Benin': '+229',
-      'Bhutan': '+975',
-      'Bolivien': '+591',
-      'Bosnien und Herzegowina': '+387',
-      'Botswana': '+267',
-      'Brasilien': '+55',
-      'Brunei': '+673',
-      'Bulgarien': '+359',
-      'Burkina Faso': '+226',
-      'Burundi': '+257',
-      'Chile': '+56',
-      'China': '+86',
-      'Costa Rica': '+506',
-      'Dänemark': '+45',
-      'Deutschland': '+49',
-      'Dominica': '+1-767',
-      'Dominikanische Republik': '+1-809',
-      'Dschibuti': '+253',
-      'Ecuador': '+593',
-      'El Salvador': '+503',
-      'Elfenbeinküste': '+225',
-      'Eritrea': '+291',
-      'Estland': '+372',
-      'Eswatini': '+268',
-      'Fidschi': '+679',
-      'Finnland': '+358',
-      'Frankreich': '+33',
-      'Gabun': '+241',
-      'Gambia': '+220',
-      'Georgien': '+995',
-      'Ghana': '+233',
-      'Grenada': '+1-473',
-      'Griechenland': '+30',
-      'Guatemala': '+502',
-      'Guinea': '+224',
-      'Guinea-Bissau': '+245',
-      'Guyana': '+592',
-      'Haiti': '+509',
-      'Honduras': '+504',
-      'Indien': '+91',
-      'Indonesien': '+62',
-      'Irak': '+964',
-      'Iran': '+98',
-      'Irland': '+353',
-      'Island': '+354',
-      'Israel': '+972',
-      'Italien': '+39',
-      'Jamaika': '+1-876',
-      'Japan': '+81',
-      'Jemen': '+967',
-      'Jordanien': '+962',
-      'Kambodscha': '+855',
-      'Kamerun': '+237',
-      'Kanada': '+1',
-      'Kap Verde': '+238',
-      'Kasachstan': '+7',
-      'Katar': '+974',
-      'Kenia': '+254',
-      'Kirgisistan': '+996',
-      'Kiribati': '+686',
-      'Kolumbien': '+57',
-      'Komoren': '+269',
-      'Kongo (Demokratische Republik)': '+243',
-      'Kongo (Republik)': '+242',
-      'Kroatien': '+385',
-      'Kuba': '+53',
-      'Kuwait': '+965',
-      'Laos': '+856',
-      'Lesotho': '+266',
-      'Lettland': '+371',
-      'Libanon': '+961',
-      'Liberia': '+231',
-      'Libyen': '+218',
-      'Liechtenstein': '+423',
-      'Litauen': '+370',
-      'Luxemburg': '+352',
-      'Madagaskar': '+261',
-      'Malawi': '+265',
-      'Malaysia': '+60',
-      'Malediven': '+960',
-      'Mali': '+223',
-      'Malta': '+356',
-      'Marokko': '+212',
-      'Marshallinseln': '+692',
-      'Mauretanien': '+222',
-      'Mauritius': '+230',
-      'Mexiko': '+52',
-      'Mikronesien': '+691',
-      'Moldawien': '+373',
-      'Monaco': '+377',
-      'Mongolei': '+976',
-      'Montenegro': '+382',
-      'Mosambik': '+258',
-      'Myanmar': '+95',
-      'Namibia': '+264',
-      'Nauru': '+674',
-      'Nepal': '+977',
-      'Neuseeland': '+64',
-      'Nicaragua': '+505',
-      'Niederlande': '+31',
-      'Niger': '+227',
-      'Nigeria': '+234',
-      'Nordkorea': '+850',
-      'Nordmazedonien': '+389',
-      'Norwegen': '+47',
-      'Oman': '+968',
-      'Österreich': '+43',
-      'Pakistan': '+92',
-      'Palau': '+680',
-      'Panama': '+507',
-      'Papua-Neuguinea': '+675',
-      'Paraguay': '+595',
-      'Peru': '+51',
-      'Philippinen': '+63',
-      'Polen': '+48',
-      'Portugal': '+351',
-      'Ruanda': '+250',
-      'Rumänien': '+40',
-      'Russland': '+7',
-      'Salomonen': '+677',
-      'Sambia': '+260',
-      'Samoa': '+685',
-      'San Marino': '+378',
-      'São Tomé und Príncipe': '+239',
-      'Saudi-Arabien': '+966',
-      'Schweden': '+46',
-      'Schweiz': '+41',
-      'Senegal': '+221',
-      'Serbien': '+381',
-      'Seychellen': '+248',
-      'Sierra Leone': '+232',
-      'Simbabwe': '+263',
-      'Singapur': '+65',
-      'Slowakei': '+421',
-      'Slowenien': '+386',
-      'Somalia': '+252',
-      'Spanien': '+34',
-      'Sri Lanka': '+94',
-      'St. Kitts und Nevis': '+1-869',
-      'St. Lucia': '+1-758',
-      'St. Vincent und die Grenadinen': '+1-784',
-      'Südafrika': '+27',
-      'Sudan': '+249',
-      'Südsudan': '+211',
-      'Suriname': '+597',
-      'Syrien': '+963',
-      'Tadschikistan': '+992',
-      'Tansania': '+255',
-      'Thailand': '+66',
-      'Timor-Leste': '+670',
-      'Togo': '+228',
-      'Tonga': '+676',
-      'Trinidad und Tobago': '+1-868',
-      'Tschad': '+235',
-      'Tschechien': '+420',
-      'Tunesien': '+216',
-      'Türkei': '+90',
-      'Turkmenistan': '+993',
-      'Tuvalu': '+688',
-      'Uganda': '+256',
-      'Ukraine': '+380',
-      'Ungarn': '+36',
-      'Uruguay': '+598',
-      'Usbekistan': '+998',
-      'Vanuatu': '+678',
-      'Venezuela': '+58',
-      'Vereinigte Arabische Emirate': '+971',
-      'Vereinigte Staaten': '+1',
-      'Vereinigtes Königreich': '+44',
-      'Vietnam': '+84',
-      'Zentralafrikanische Republik': '+236',
-      'Zypern': '+357'
-    };
+    // Automatisches Datum und Ort
+    (function initDefaults() {
+      const today = new Date().toISOString().slice(0,10);
+      const dateField = document.getElementById('dateSigned');
+      if (dateField && !dateField.value) dateField.value = today;
+      const place = document.getElementById('place');
+      if (place && !place.value) place.value = 'Basel';
+    })();
 
-    const countrySelect = document.getElementById('country');
-    const phonePrefix = document.getElementById('phonePrefix');
-    const phoneInput = document.getElementById('phone');
+    // Formular an Vercel-API senden
+    document.getElementById('vollmachtForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const submitBtn = document.getElementById('submitBtn');
+      const success = document.getElementById('formSuccess');
+      const error = document.getElementById('formError');
 
-    function updatePhonePrefix() {
-      const selectedCountry = countrySelect.value;
-      const prefix = countryCodes[selectedCountry] || '+41';
-      phonePrefix.textContent = prefix;
-    }
+      if (!form.reportValidity()) return;
 
-    countrySelect.addEventListener('change', updatePhonePrefix);
+      const companyField = document.getElementById('company');
+      if (companyField && companyField.value.trim() !== '') return;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const today = new Date().toISOString().slice(0, 10);
-      document.getElementById('dateSigned').value = today;
-      updatePhonePrefix();
-    });
+      submitBtn.disabled = true;
+      success.style.display = 'none';
+      error.style.display = 'none';
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const container = document.querySelector('.container');
-      const success = document.getElementById('success-message');
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
 
-      container.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        success.style.display = 'none';
-
-        const data = {
-          firstname: document.getElementById('firstname').value,
-          lastname: document.getElementById('lastname').value,
-          dob: document.getElementById('dob').value,
-          gender: document.getElementById('gender').value,
-          address: document.getElementById('address').value,
-          plz: document.getElementById('plz').value,
-          city: document.getElementById('city').value,
-          country: document.getElementById('country').value,
-          phone: phonePrefix.textContent + ' ' + phoneInput.value.trim(),
-          passport: document.getElementById('passport').value,
-          email: document.getElementById('email').value,
-          place: document.getElementById('place').value,
-          dateSigned: document.getElementById('dateSigned').value,
-          confirm: document.getElementById('confirm').checked,
-        };
-
-        if (!data.confirm) {
-          alert('Bitte bestätigen Sie die Erklärung.');
-          return;
-        }
-
-        try {
-          const response = await fetch('https://novaswissmed-vollmacht.vercel.app/api/vollmacht', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...data,
-              vollmachtText: `
+      data.vollmachtText = `
 DIGITALE VOLLMACHT ZUR WEITERGABE MEDIZINISCHER DATEN
 
-Bitte füllen Sie das folgende Formular aus, um NovaSwissMed die Vollmacht zur Weitergabe Ihrer medizinischen Daten zu erteilen.
+Ich, ${data.name}, geboren am ${data.dob}, wohnhaft in ${data.address}, 
+erteile hiermit NovaSwissMed, vertreten durch Herrn Mohammad Kheir Naji, 
+die Vollmacht, meine medizinischen Daten an zur Behandlung erforderliche 
+medizinische Institutionen weiterzugeben.
 
-Die Daten werden ausschließlich im Rahmen Ihrer medizinischen Versorgung an zur Behandlung erforderliche medizinische Institutionen weitergeleitet.
+Ich bestätige, dass alle von mir gemachten Angaben vollständig, richtig und 
+der Wahrheit entsprechend sind.
 
-PERSÖNLICHE ANGABEN
+Ort, Datum: ${data.place}, ${data.dateSigned}
+Unterschrift: Digitale Bestätigung durch Absenden des Formulars
+      `.trim();
 
-Vorname: ${data.firstname}
-Nachname: ${data.lastname}
-Geburtsdatum: ${data.dob.split('-').reverse().join('.')}   Geschlecht: ${data.gender}
-Adresse (Strasse und Hausnummer): ${data.address}
-PLZ: ${data.plz}   Stadt: ${data.city}   Land: ${data.country}
-Telefonnummer: ${data.phone}   Reisepassnummer: ${data.passport || '–'}
-E-Mail-Adresse: ${data.email}
+      try {
+        const response = await fetch('https://novaswissmed-vollmacht.vercel.app/api/vollmacht', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
 
-ERKLÄRUNG ZUR VOLLMACHT:
-
-Ich erteile hiermit NovaSwissMed, vertreten durch Herrn Mohammad Kheir Naji, die Vollmacht, meine medizinischen Daten an andere beteiligte medizinische Stellen weiterzugeben. Die Weitergabe erfolgt ausschließlich zur Abklärung, Behandlung und Koordination meiner medizinischen Versorgung und ist auf die dafür erforderlichen Institutionen beschränkt.
-
-Ich bestätige, dass alle von mir gemachten Angaben vollständig, richtig und der Wahrheit entsprechend sind.
-
-Diese Vollmacht wird mit meiner Unterschrift – ob digital bestätigt oder handschriftlich unterschrieben – rechtsverbindlich.
-
-Ich erkläre mich mit der elektronischen Weitergabe meiner medizinischen Daten einverstanden.
-
-Ort, Datum: ${data.place}, ${data.dateSigned.split('-').reverse().join('.')}
-
-Unterschrift (Patient): Digitale Bestätigung durch Absenden des Formulars
-
-Unterschrift der bevollmächtigten Stelle NovaSwissMed: Digitale Bestätigung durch System
-
-Datum des Eingangs: ${data.dateSigned.split('-').reverse().join('.')}
-              `.trim(),
-            }),
-          });
-
-          if (response.ok) {
-            success.style.display = 'block';
-            container.reset();
-            document.getElementById('dateSigned').value = new Date().toISOString().slice(0, 10);
-            document.getElementById('place').value = '';
-            updatePhonePrefix();
-          } else {
-            throw new Error('HTTP ' + response.status);
-          }
-        } catch (err) {
-          console.error('Netzwerkfehler:', err);
-          alert('Fehler beim Senden. Bitte versuchen Sie es später erneut.');
+        if (response.ok) {
+          success.style.display = 'block';
+          form.reset();
+          document.getElementById('dateSigned').value = new Date().toISOString().slice(0,10);
+          document.getElementById('place').value = 'Basel';
+        } else {
+          throw new Error('HTTP ' + response.status);
         }
-      });
+      } catch (err) {
+        console.error('Netzwerkfehler:', err);
+        error.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+      }
     });
   </script>
 </body>
