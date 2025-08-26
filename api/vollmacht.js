@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
 export default async function handler(req, res) {
-  // --- CORS-Header setzen ---
+  // --- CORS-Header immer setzen ---
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -15,10 +15,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const data = req.body;
+    console.log("📩 Neue Anfrage erhalten...");
 
-    // --- Sicherheits-Check ---
+    const data = req.body;
+    console.log("➡️ Eingehende Daten:", JSON.stringify(data, null, 2));
+
+    // --- Pflichtfelder prüfen ---
     if (!data.name || !data.email || !data.dob || !data.address) {
+      console.error("❌ Pflichtfelder fehlen!");
       return res.status(400).json({ message: "Fehlende Pflichtfelder" });
     }
 
@@ -38,7 +42,7 @@ Ort, Datum: ${data.place}, ${data.dateSigned}
 Unterschrift: Digitale Bestätigung durch Absenden des Formulars
     `.trim();
 
-    // --- Mail-Body für Brevo ---
+    // --- Mail vorbereiten ---
     const emailBody = {
       sender: { email: "no-reply@novaswissmed.ch", name: "NovaSwissMed" },
       to: [{ email: "DEINE_EMAIL@domain.ch", name: "NovaSwissMed Verwaltung" }],
@@ -57,27 +61,33 @@ Unterschrift: Digitale Bestätigung durch Absenden des Formulars
       `,
     };
 
+    console.log("📨 Sende Daten an Brevo API...");
+
     // --- API Request an Brevo ---
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         "accept": "application/json",
         "content-type": "application/json",
-        "api-key": process.env.BREVO_API_KEY, // <-- kommt von Vercel
+        "api-key": process.env.BREVO_API_KEY, // <-- Vercel Variable
       },
       body: JSON.stringify(emailBody),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Brevo Fehler:", errorText);
-      return res.status(500).json({ message: "Fehler beim Senden der E-Mail" });
+      console.error("❌ Brevo Fehler:", errorText);
+      return res.status(500).json({ 
+        message: "Fehler beim Senden der E-Mail", 
+        error: errorText 
+      });
     }
 
+    console.log("✅ E-Mail erfolgreich über Brevo versendet!");
     return res.status(200).json({ message: "E-Mail erfolgreich gesendet" });
 
   } catch (error) {
-    console.error("Server Fehler:", error);
+    console.error("🔥 Server Fehler:", error);
     return res.status(500).json({ message: "Serverfehler", error: error.message });
   }
 }
