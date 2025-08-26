@@ -1,1 +1,181 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Digitale Vollmacht – NovaSwissMed</title>
+  <style>
+    :root { --bg:#fff; --fg:#111; --muted:#666; --brand:#0a6cf1; --line:#e6e6e6; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--fg); background: var(--bg); }
+    .wrap { max-width: 860px; margin: 32px auto; padding: 0 16px; }
+    h1 { font-size: 1.6rem; margin: 0 0 4px; }
+    p.lead { color: var(--muted); margin: 0 0 24px; }
+    form { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+    fieldset { border: 0; padding: 0; margin: 0 0 18px; }
+    legend { font-weight: 600; margin: 0 0 10px; }
+    .grid { display: grid; gap: 14px; }
+    @media (min-width: 720px) { .grid.cols-2 { grid-template-columns: 1fr 1fr; } }
+    label { display: block; font-weight: 600; margin: 0 0 6px; }
+    .req { color: #c81414; }
+    input, textarea, select {
+      width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    .check { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
+    .muted { color: var(--muted); }
+    .note { background: #f7f9fc; border: 1px solid var(--line); padding: 14px; border-radius: 10px; }
+    .actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    button {
+      appearance: none; border: 0; background: var(--brand); color: #fff; padding: 12px 18px;
+      border-radius: 12px; font-weight: 700; cursor: pointer;
+    }
+    button[disabled] { opacity: .7; cursor: not-allowed; }
+    .small { font-size: .92rem; }
+    .success, .error { margin-top: 14px; padding: 12px 14px; border-radius: 10px; display: none; }
+    .success { background: #e8f7ed; border: 1px solid #bfe6cb; }
+    .error { background: #fde8ea; border: 1px solid #f5bcc2; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Digitale Vollmacht zur Weitergabe medizinischer Daten</h1>
+    <p class="lead">Bitte füllen Sie das folgende Formular aus, um NovaSwissMed die Vollmacht zur Weitergabe Ihrer medizinischen Daten an zur Behandlung erforderliche medizinische Institutionen zu erteilen.</p>
 
+    <form id="vollmachtForm">
+      <!-- SPAM-HONEYPOT -->
+      <input type="text" name="company" id="company" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" />
+
+      <fieldset>
+        <legend>Ihre Angaben</legend>
+        <div class="grid cols-2">
+          <div>
+            <label for="name">Vor- und Nachname <span class="req">*</span></label>
+            <input id="name" name="name" type="text" autocomplete="name" required />
+          </div>
+          <div>
+            <label for="dob">Geburtsdatum <span class="req">*</span></label>
+            <input id="dob" name="dob" type="date" required />
+          </div>
+        </div>
+        <div>
+          <label for="address">Adresse (Strasse, PLZ, Ort) <span class="req">*</span></label>
+          <input id="address" name="address" type="text" required />
+        </div>
+        <div class="grid cols-2">
+          <div>
+            <label for="email">E-Mail-Adresse <span class="req">*</span></label>
+            <input id="email" name="email" type="email" required />
+          </div>
+          <div>
+            <label for="phone">Telefonnummer (optional)</label>
+            <input id="phone" name="phone" type="tel" />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Erklärung zur Vollmacht</legend>
+        <div class="check">
+          <input id="confirm" name="confirm" type="checkbox" required />
+          <label for="confirm">Ich bestätige die oben stehende Erklärung und erkläre mich mit der elektronischen Weitergabe meiner medizinischen Daten einverstanden. <span class="req">*</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Ort & Datum</legend>
+        <div class="grid cols-2">
+          <div>
+            <label for="place">Ort <span class="req">*</span></label>
+            <input id="place" name="place" type="text" placeholder="Basel" required />
+          </div>
+          <div>
+            <label for="dateSigned">Datum <span class="req">*</span></label>
+            <input id="dateSigned" name="dateSigned" type="date" required />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Datenschutz</legend>
+        <div class="check">
+          <input id="privacy" name="privacy" type="checkbox" required />
+          <label for="privacy">Ich habe die <a href="/datenschutz" target="_blank">Datenschutzerklärung</a> gelesen. <span class="req">*</span></label>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button id="submitBtn" type="submit">Vollmacht digital erteilen</button>
+        <span class="muted small">Mit Klick auf „Vollmacht digital erteilen“ übermitteln Sie die oben genannten Daten an NovaSwissMed.</span>
+      </div>
+
+      <div id="formSuccess" class="success">Vielen Dank! Ihre Vollmacht wurde erfolgreich gesendet.</div>
+      <div id="formError" class="error">Leider ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.</div>
+    </form>
+  </main>
+
+  <script>
+    (function initDefaults() {
+      const today = new Date().toISOString().slice(0,10);
+      const dateField = document.getElementById('dateSigned');
+      if (dateField && !dateField.value) dateField.value = today;
+      const place = document.getElementById('place');
+      if (place && !place.value) place.value = 'Basel';
+    })();
+
+    document.getElementById('vollmachtForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const submitBtn = document.getElementById('submitBtn');
+      const success = document.getElementById('formSuccess');
+      const error = document.getElementById('formError');
+
+      if (!form.reportValidity()) return;
+
+      const companyField = document.getElementById('company');
+      if (companyField && companyField.value.trim() !== '') return;
+
+      submitBtn.disabled = true;
+      success.style.display = 'none';
+      error.style.display = 'none';
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      data.vollmachtText = `
+DIGITALE VOLLMACHT ZUR WEITERGABE MEDIZINISCHER DATEN
+
+Ich, ${data.name}, geboren am ${data.dob}, wohnhaft in ${data.address}, 
+erteile hiermit NovaSwissMed, vertreten durch Herrn Mohammad Kheir Naji, 
+die Vollmacht, meine medizinischen Daten an zur Behandlung erforderliche 
+medizinische Institutionen weiterzugeben.
+
+Ort, Datum: ${data.place}, ${data.dateSigned}
+Unterschrift: Digitale Bestätigung durch Absenden des Formulars
+      `.trim();
+
+      try {
+        const response = await fetch('https://novaswissmed-vollmacht.vercel.app/api/vollmacht', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          success.style.display = 'block';
+          form.reset();
+          document.getElementById('dateSigned').value = new Date().toISOString().slice(0,10);
+          document.getElementById('place').value = 'Basel';
+        } else {
+          throw new Error('HTTP ' + response.status);
+        }
+      } catch (err) {
+        console.error('Netzwerkfehler:', err);
+        error.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
