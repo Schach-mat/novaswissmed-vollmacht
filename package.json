@@ -1,7 +1,11 @@
 {
-  "name": "vollmacht-formular",
+  "name": "novaswissmed-forms-api",
   "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node api/send-email.js"
+  },
   "dependencies": {
-    "nodemailer": "^6.9.13"
+    "sib-api-v3-sdk": "^8.5.0"
   }
 }
